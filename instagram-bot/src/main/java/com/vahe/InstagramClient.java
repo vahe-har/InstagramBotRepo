@@ -25,7 +25,8 @@ import com.vahe.utils.Sites;
 public class InstagramClient {
 
 	private static final int ONE_HOUR = 3_600_000;
-	private static final Logger LOGGER = Logger.getLogger(InstagramClient.class);
+	private static final Logger LOGGER = Logger
+			.getLogger(InstagramClient.class);
 	private static final Token EMPTY_TOKEN = null;
 
 	private static final String clientId = "df5aa5a17b6949eeb76701c1253b9be3";
@@ -33,57 +34,71 @@ public class InstagramClient {
 	private static final String callbackUrl = "http://rpnews.ru/";
 
 	// instagram api object for only getting data
-	private Instagram instagram;
-//	private String maxTagId = "";
+	private Instagram instagramClient;
+	// private String maxTagId = "";
 	private long pageNumber = 0;
-//	private boolean isImagesOver = false;
+	// private boolean isImagesOver = false;
 	private long totalLikeCount = 0;
 	private long likeInHour = 0;
 	private Calendar startTime;
 	private final InstagramLiker instagramLiker;
-	
+
 	private final LikeParmetes likeParmetes;
 
 	public InstagramClient(LikeParmetes likeParmetes) {
 		this.likeParmetes = likeParmetes;
 		List<InstagramLiker> instagramLikers = new ArrayList<>();
-//		instagramLikers.add(new StatigramLiker(likeParmetes.getUsername(), likeParmetes.getPassword()));
-//		instagramLikers.add(new WebstagramLiker(likeParmetes.getUsername(), likeParmetes.getPassword()));
-		if(this.likeParmetes.getSiteList().contains(Sites.WEBSTAGRAM)){
+		// instagramLikers.add(new StatigramLiker(likeParmetes.getUsername(),
+		// likeParmetes.getPassword()));
+		// instagramLikers.add(new WebstagramLiker(likeParmetes.getUsername(),
+		// likeParmetes.getPassword()));
+		if (this.likeParmetes.getSiteList().contains(Sites.WEBSTAGRAM)) {
 			instagramLikers.add(new WebstagramLiker(likeParmetes));
 		}
-		if(this.likeParmetes.getSiteList().contains(Sites.STATIGRAM)){
+		if (this.likeParmetes.getSiteList().contains(Sites.STATIGRAM)) {
 			instagramLikers.add(new StatigramLiker(likeParmetes));
 		}
-		this.instagramLiker = CompositeLiker.newInstance(instagramLikers); 
-		initInstagram();
+		this.instagramLiker = CompositeLiker.newInstance(instagramLikers);
+		initInstagramCrient();
 	}
 
-	private void initInstagram() {
-		InstagramService service = new InstagramAuthService()
-									.apiKey(clientId)
-									.apiSecret(clientSecret)
-									.callback(callbackUrl)
-									.scope("basic")
-									.build();
+	public void likeImagesInTag(final String tagName) {
+		startTime = Calendar.getInstance();
+		LOGGER.info("!!!!!!!!!   Start likeing   !!!!!!!!!!");
+	
+		// while (!isImagesOver) {
+		while (true) {
+			try {
+				likeOnePage(tagName);
+			} catch (Exception e) {
+				LOGGER.error("General Exception Handler  ", e);
+			}
+		}
+	}
+
+	private void initInstagramCrient() {
+		InstagramService service = new InstagramAuthService().apiKey(clientId)
+				.apiSecret(clientSecret).callback(callbackUrl).scope("basic")
+				.build();
 
 		String authorizationUrl = service.getAuthorizationUrl(EMPTY_TOKEN);
 
 		// This is using
-//		 username karine_min
-//		 password karine12345
-		String verifierCode = CodeScraper.getAPICode(authorizationUrl,likeParmetes.getUsername(), likeParmetes.getPassword());
+		// username karine_min
+		// password karine12345
+		String verifierCode = CodeScraper.getAPICode(authorizationUrl,
+				likeParmetes.getUsername(), likeParmetes.getPassword());
 
 		LOGGER.info("Verification code is  " + verifierCode);
 		Verifier verifier = new Verifier(verifierCode);
 		Token accessToken = service.getAccessToken(EMPTY_TOKEN, verifier);
 
-		instagram = new Instagram(accessToken);
-//		instagram = new Instagram(clientId);
+		instagramClient = new Instagram(accessToken);
+		// instagram = new Instagram(clientId);
 
 		UserInfo userInfo;
 		try {
-			userInfo = instagram.getCurrentUserInfo();
+			userInfo = instagramClient.getCurrentUserInfo();
 			LOGGER.info("***** User Info ******");
 			LOGGER.info("Username : " + userInfo.getData().getUsername());
 
@@ -91,20 +106,6 @@ public class InstagramClient {
 			LOGGER.error("Connot initialize Instagram Client  ", e);
 		}
 
-	}
-
-	public void likeImagesInTag(final String tagName) {
-		startTime = Calendar.getInstance();
-		LOGGER.info("!!!!!!!!!   Start likeing   !!!!!!!!!!");
-		
-//		while (!isImagesOver) {
-			while (true) {
-				try {
-					likeOnePage(tagName);
-				} catch (Exception e) {
-					LOGGER.error("General Exception Handler  ", e);
-				}
-			}
 	}
 
 	private void incrementLikeCount() {
@@ -124,9 +125,10 @@ public class InstagramClient {
 					checkForTime();
 					instagramLiker.likeByPhotoId(photoId);
 					incrementLikeCount();
-					final String msg = "This image was liked     " + mediaFeedData.getLink() + "      " + photoId  + "\n Total(" + totalLikeCount + ")\n";
-					
-					
+					final String msg = "This image was liked     "
+							+ mediaFeedData.getLink() + "      " + photoId
+							+ "\n Total(" + totalLikeCount + ")\n";
+
 					mediaFeedData.getCreatedTime();
 					LOGGER.info(msg);
 
@@ -140,7 +142,8 @@ public class InstagramClient {
 
 	private void checkForTime() {
 		Calendar currentTime = Calendar.getInstance();
-		long delta = currentTime.getTimeInMillis() - startTime.getTimeInMillis();
+		long delta = currentTime.getTimeInMillis()
+				- startTime.getTimeInMillis();
 		if (delta < ONE_HOUR && likeInHour >= likeParmetes.getMaxLikePerHour()) {
 			try {
 				long w = (ONE_HOUR - delta + 10_000) / (1000 * 60);
@@ -157,20 +160,22 @@ public class InstagramClient {
 
 	}
 
-	
 	private List<MediaFeedData> getRecentElements(String tagName) {
 		try {
 			TimeUnit.MILLISECONDS.sleep(500);
 			List<MediaFeedData> data = new ArrayList<>();
 			try {
 				LOGGER.info("Before getting recent media");
-				TagMediaFeed recentMediaTags = instagram.getRecentMediaTags(tagName);
+				TagMediaFeed recentMediaTags = instagramClient
+						.getRecentMediaTags(tagName);
 				LOGGER.info("After getting recent media");
 				data = recentMediaTags.getData();
 				pageNumber++;
 			} catch (InstagramException e) {
 				LOGGER.error("Exception in getAllElementInTag(tagName)  ", e);
-					TimeUnit.SECONDS.sleep(3);
+				TimeUnit.SECONDS.sleep(3);
+//				LOGGER.info("Refreshing Acces token for instagram Client");
+//				initInstagramCrient();
 			}
 			List<MediaFeedData> singleList = new ArrayList<>();
 			if (!data.isEmpty()) {
@@ -184,36 +189,23 @@ public class InstagramClient {
 			LOGGER.error("Exception in getRecentElements ", e1);
 			return new ArrayList<>();
 		}
-		
-	}
-	/*
-	private List<MediaFeedData> getAllElementInTag(String tagName, String min, String max) {
-		List<MediaFeedData> mediaFeeds = new ArrayList<>();
-		if (isImagesOver) {
-			return mediaFeeds;
-		}
-		try {
-			TagMediaFeed mediaFeed;
-			if (min == null && max == null) {
-				mediaFeed = instagram.getRecentMediaTags(tagName);
-			} else {
-				mediaFeed = instagram.getRecentMediaTags(tagName, min, max);
-			}
-			Pagination pagination = mediaFeed.getPagination();
-			String nextMaxTagId = pagination.getNextMaxTagId();
 
-			if (nextMaxTagId == null || maxTagId.equals(nextMaxTagId)) {// there aren't new images
-				isImagesOver = true;
-			} else {
-				maxTagId = nextMaxTagId;
-				pageNumber++;
-			}
-
-			mediaFeeds = mediaFeed.getData();
-		} catch (InstagramException e) {
-			LOGGER.error("Exception in getAllElementInTag(tagName, min, max)  ", e);
-		}
-		return mediaFeeds;
 	}
-	*/
+
+//	private List<MediaFeedData> getAllElementInTag(String tagName, String
+//	min, String max) { List<MediaFeedData> mediaFeeds = new ArrayList<>(); if
+//	(isImagesOver) { return mediaFeeds; } try { TagMediaFeed mediaFeed; if
+//	(min == null && max == null) { mediaFeed =
+//	instagram.getRecentMediaTags(tagName); } else { mediaFeed =
+//	instagram.getRecentMediaTags(tagName, min, max); } Pagination pagination
+//	= mediaFeed.getPagination(); String nextMaxTagId =
+//	pagination.getNextMaxTagId();
+//	
+//	if (nextMaxTagId == null || maxTagId.equals(nextMaxTagId)) {// there
+//	aren't new images isImagesOver = true; } else { maxTagId = nextMaxTagId;
+//	pageNumber++; }
+//	
+//	mediaFeeds = mediaFeed.getData(); } catch (InstagramException e) {
+//	LOGGER.error("Exception in getAllElementInTag(tagName, min, max)  ", e);
+//	} return mediaFeeds; }
 }
