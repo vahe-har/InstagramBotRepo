@@ -105,7 +105,7 @@ public class InstagramClient {
 		} catch (InstagramException e) {
 			LOGGER.error("Connot initialize Instagram Client  ", e);
 		}
-
+//		instagramClient.
 	}
 
 	private void incrementLikeCount() {
@@ -172,7 +172,7 @@ public class InstagramClient {
 				data = recentMediaTags.getData();
 				pageNumber++;
 			} catch (InstagramException e) {
-				LOGGER.error("Exception in getAllElementInTag(tagName)  ", e);
+				LOGGER.error("Exception in getRecentElements(tagName)  ", e);
 				TimeUnit.SECONDS.sleep(3);
 //				LOGGER.info("Refreshing Acces token for instagram Client");
 //				initInstagramCrient();

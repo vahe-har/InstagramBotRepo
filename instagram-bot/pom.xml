@@ -44,7 +44,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>fully.qualified.MainClass</mainClass>
+							<mainClass>com.vahe.Program</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
