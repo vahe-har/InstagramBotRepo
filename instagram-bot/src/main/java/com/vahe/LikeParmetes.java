@@ -2,7 +2,7 @@ package com.vahe;
 
 import java.util.List;
 
-import com.vahe.utils.Sites;
+import com.vahe.utils.Site;
 
 
 public class LikeParmetes {
@@ -13,10 +13,10 @@ public class LikeParmetes {
 	private final String tagname;
 	private final String username;
 	private final String password;
-	private final List<Sites> siteList;
+	private final List<Site> siteList;
 
 
-	public LikeParmetes(int likeCount, int delay, int maxLikePerHour, String tagname, String username, String password,List<Sites> siteList) {
+	public LikeParmetes(int likeCount, int delay, int maxLikePerHour, String tagname, String username, String password,List<Site> siteList) {
 		this.likeCount = likeCount;
 		this.delay = delay;
 		this.maxLikePerHour = maxLikePerHour;
@@ -51,7 +51,7 @@ public class LikeParmetes {
 	}
 	
 	
-	public List<Sites> getSiteList() {
+	public List<Site> getSiteList() {
 		return siteList;
 	}
 }

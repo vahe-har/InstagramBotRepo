@@ -1,10 +1,10 @@
 package com.vahe.utils;
 
-public enum Sites {
+public enum Site {
 
 	WEBSTAGRAM("webstagram"),STATIGRAM("statigram");
 	
-	private Sites(String name){
+	private Site(String name){
 		this.name = name;
 	}
 	private final String name;

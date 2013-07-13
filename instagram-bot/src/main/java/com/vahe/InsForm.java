@@ -8,7 +8,9 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -27,7 +29,9 @@ import javax.swing.border.LineBorder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.vahe.utils.Sites;
+import com.vahe.follower.FollowerClient;
+import com.vahe.liker.LikerClient;
+import com.vahe.utils.Site;
 
 public class InsForm extends JFrame {
 
@@ -191,12 +195,12 @@ public class InsForm extends JFrame {
 		scrollPane.setViewportView(textArea);
 		textArea.setRows(50);
 		
-		chckbxWebstagram = new JCheckBox(Sites.WEBSTAGRAM.getName());
+		chckbxWebstagram = new JCheckBox(Site.WEBSTAGRAM.getName());
 		chckbxWebstagram.setSelected(true);
 		chckbxWebstagram.setBounds(178, 308, 112, 24);
 		contentPane.add(chckbxWebstagram);
 		
-		chckbxStatigram = new JCheckBox(Sites.STATIGRAM.getName());
+		chckbxStatigram = new JCheckBox(Site.STATIGRAM.getName());
 		chckbxStatigram.setSelected(true);
 		chckbxStatigram.setBounds(178, 342, 112, 24);
 		contentPane.add(chckbxStatigram);
@@ -287,13 +291,13 @@ public class InsForm extends JFrame {
 		String tagname = this.tagName.getText();
 		String delay = this.delay.getText();
 		String maxLikes = this.maxLikes.getText();
-		List<Sites> siteList = new ArrayList<>();
+		List<Site> siteList = new ArrayList<>();
 		
 		if(chckbxStatigram.isSelected()){
-			siteList.add(Sites.STATIGRAM);
+			siteList.add(Site.STATIGRAM);
 		}
 		if(chckbxWebstagram.isSelected()){
-			siteList.add(Sites.WEBSTAGRAM);
+			siteList.add(Site.WEBSTAGRAM);
 		}
 		
 
@@ -316,7 +320,30 @@ public class InsForm extends JFrame {
 		LOGGER.info("siets list is " + siteList);
 		LikeParmetes likeParmetes = new LikeParmetes(Integer.valueOf(likePerPhoto), Integer.valueOf(delay), Integer.valueOf(maxLikes), tagname,
 				username, password,siteList);
-		InstagramClient instagramClient = new InstagramClient(likeParmetes);
-		instagramClient.likeImagesInTag(tagname);
+		
+		final LikerClient instagramClient = new LikerClient(likeParmetes);
+		
+		final FollowerClient followerClient = new FollowerClient(likeParmetes);
+		
+		Executors.newSingleThreadExecutor().submit(new Runnable() {
+			@Override
+			public void run() {
+				instagramClient.likeImagesInTag();
+			}
+		});
+		
+//		try {
+//			TimeUnit.SECONDS.sleep(10);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//		Executors.newSingleThreadExecutor().submit(new Runnable() {
+//			@Override
+//			public void run() {
+//				System.out.println("Run executors ...");
+//				followerClient.startFollow();
+//			}
+//		});
+		
 	}
 }
